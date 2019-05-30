@@ -1,2 +1,2 @@
-# verify-email-aws
-Serverless AWS application for email verification
+# validate-email-aws
+Serverless AWS application for email validation
