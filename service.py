@@ -1,8 +1,21 @@
+import json
+
 from validate import validate
 
 
 def handler(event, context):
-    email = event.get('email')
+    query = event.get('queryStringParameters') or {}
+    email = query.get('email')
+    if not email:
+        response = {
+            'error': 'No email provided'
+        }
+        return {
+            'statusCode': 400,
+            'headers': {'Content-Type': 'application/json'},
+            'body': json.dumps(response)
+        }
+
     ret = validate(email)
     if ret:
         response = {
@@ -18,5 +31,5 @@ def handler(event, context):
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json'},
-        'body': response
+        'body': json.dumps(response)
     }

@@ -1,3 +1,5 @@
 {
-  "email": "sumit.ghosh32@gmail.com"
+  "queryStringParameters": {
+    "email": "sumit.ghosh32@gmail.com"
+  }
 }

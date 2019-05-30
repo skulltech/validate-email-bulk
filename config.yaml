@@ -1,10 +1,9 @@
 region: us-east-1
 
-function_name: my_lambda_function
+function_name: validate_email
 handler: service.handler
-description: My first lambda function
-runtime: python2.7
-# role: lambda_basic_execution
+description: Validate an email
+runtime: python3.7
 
 # S3 upload requires appropriate role with s3:PutObject permission
 # (ex. basic_s3_upload), a destination bucket, and the key prefix
