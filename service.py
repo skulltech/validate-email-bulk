@@ -16,18 +16,7 @@ def handler(event, context):
             'body': json.dumps(response)
         }
 
-    ret = validate(email)
-    if ret:
-        response = {
-            'email': ret,
-            'valid': True
-        }
-    else:
-        response = {
-            'email': email,
-            'valid': False
-        }
-
+    response = validate(email)
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json'},
