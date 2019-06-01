@@ -105,3 +105,6 @@ venv.bak/
 
 # IntelliJ IDE files
 .idea/
+
+# CSV files used for testing
+*.csv
