@@ -1,30 +1,31 @@
 import csv
 import time
-from multiprocessing import Pool
 
+import redis
+from rq import Queue
+
+from models import push
 from validate import validate
 
+conn = redis.from_url('redis://127.0.0.1:6379')
+q = Queue(connection=conn)
 
-def parallel(email):
-    ret = validate(email)
-    return [ret[k] for k in sorted(ret)]
+
+def task(email):
+    response = validate(email)
+    push(response)
+    return response
 
 
 def process(input_file):
-    emails = []
+    enqueued = 0
     with open(input_file, newline='') as csv_file:
         reader = csv.reader(csv_file)
         for row in reader:
-            emails.append(row[0])
-
-    with Pool(5) as p:
-        processed = list(p.imap(parallel, emails))
-
-    with open(f'{input_file[:-4]}_processed.csv', mode='w') as processed_file:
-        writer = csv.writer(processed_file)
-        writer.writerow(['color', 'deliverable', 'email', 'mx', 'normalized', 'syntax'])
-        for line in processed:
-            writer.writerow(line)
+            if row[0]:
+                q.enqueue_call(func='batch.task', args=(row[0],), result_ttl=7200, timeout=30)
+                enqueued = enqueued + 1
+                print(f'[*] Enqueued jobs: {enqueued}')
 
 
 def main():
