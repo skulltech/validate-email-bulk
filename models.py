@@ -1,6 +1,8 @@
 from peewee import *
+from playhouse.dataset import DataSet
 
 db = SqliteDatabase('validator.db')
+ds = DataSet('sqlite:///validator.db')
 
 
 class EmailInfo(Model):
@@ -32,10 +34,27 @@ def pull(email):
 
 
 def push(record):
-    EmailInfo.create(email=record['email'], syntax=record['syntax'], mx=record['mx'], deliverable=record['deliverable'],
-                     color=record['color'], normalized=record['normalized'])
-    count = EmailInfo.select().count()
-    print(f'[*] New record added to database: {record["email"]}. Total count: {count}.')
+    instance, created = EmailInfo.get_or_create(email=record['email'])
+    instance.syntax = record['syntax']
+    instance.mx = record['mx']
+    instance.deliverable = record['deliverable']
+    instance.color = record['color']
+    instance.normalized = record['normalized']
+    instance.save()
+    if created:
+        print('[*] New record: {}'.format(record['email']))
+    else:
+        print('[*] Updated record: {}'.format(record['email']))
+    return created
+
+
+def export(emails):
+    records = []
+    for email in emails:
+        i = EmailInfo.get_or_none(EmailInfo.email == email)
+        if i:
+            records.append([i.email, i.syntax, i.mx, i.deliverable, i.color, i.normalized])
+    return records
 
 
 db.connect()

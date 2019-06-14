@@ -1,0 +1,76 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<h1>Transform a file demo</h1>
+
+<form action="{{ url_for('process') }}" method="POST" enctype="multipart/form-data">
+  <div class="form-group">
+    <label for="exampleFormControlFile1">Example file input</label>
+    <input type="file" name="file" class="form-control-file form-control-lg" id="exampleFormControlFile1">
+  </div>
+  <input type="submit"/>
+</form>
+
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    // custom javascript
+
+    $(document).ready(() => {
+        console.log('Sanity Check!');
+    });
+
+    $('form').submit(function (event) {
+        var formdata = $(this).serializeObject();
+        console.log(formdata);
+        event.preventDefault();
+
+        $("#loading").toggleClass("invisible");
+        $("#submitBtn").toggleClass("invisible");
+
+        $.ajax(
+            {
+                url: '/enqueue',
+                data: formdata,
+                type: 'POST',
+                dataType: 'JSON'
+            }
+        )
+            .done((res) => {
+                getStatus(res.data.task_id)
+            })
+            .fail((err) => {
+                console.log(err)
+            })
+    });
+
+    function getStatus(taskID) {
+        $.ajax({
+            url: `/tasks/${taskID}`,
+            method: 'GET'
+        })
+            .done((res) => {
+                const taskStatus = res.data.task_status;
+
+                if (taskStatus === 'finished' || taskStatus === 'failed') {
+                    window.location.assign(`/download/${taskID}`);
+                    $("#loading").toggleClass("invisible");
+                    $("#submitBtn").toggleClass("invisible");
+                    return false;
+                }
+                setTimeout(function () {
+                    getStatus(res.data.task_id);
+                }, 1000);
+            })
+            .fail((err) => {
+                console.log(err)
+            })
+    }
+</script>
+</body>
+</html>
