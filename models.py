@@ -8,10 +8,10 @@ ds = DataSet('sqlite:///validator.db')
 class EmailInfo(Model):
     email = CharField(index=True, unique=True)
     syntax = BooleanField()
-    mx = BooleanField()
-    deliverable = BooleanField()
+    mx = BooleanField(null=True)
+    deliverable = BooleanField(null=True)
     color = CharField()
-    normalized = CharField()
+    normalized = CharField(null=True)
 
     class Meta:
         database = db
@@ -34,12 +34,7 @@ def pull(email):
 
 
 def push(record):
-    instance, created = EmailInfo.get_or_create(email=record['email'])
-    instance.syntax = record['syntax']
-    instance.mx = record['mx']
-    instance.deliverable = record['deliverable']
-    instance.color = record['color']
-    instance.normalized = record['normalized']
+    instance, created = EmailInfo.get_or_create(email=record['email'], defaults=record)
     instance.save()
     if created:
         print('[*] New record: {}'.format(record['email']))
