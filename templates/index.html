@@ -14,7 +14,12 @@
 <form class="form-signin" action="{{ url_for('process') }}" method="POST" enctype="multipart/form-data">
   <h1 class="h3 mb-3 font-weight-normal">Validate Emails</h1>
   <label for="inputFile" class="sr-only">CSV file</label>
-  <input type="file" name="file" id="inputFile" class="form-control" placeholder="Email address" required autofocus>
+  <input type="file" name="file" id="inputFile" class="form-control" placeholder="CSV file" required>
+  <div class="checkbox mb-3">
+    <label>
+      <input type="checkbox" name="deep" value="deep"> Deep scan
+    </label>
+  </div>
   <button class="btn btn-lg btn-primary btn-block ladda-button" data-style="expand-right" type="submit">
     <span class="ladda-label">Upload and Process</span>
   </button>

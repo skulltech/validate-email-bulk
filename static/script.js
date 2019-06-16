@@ -59,6 +59,12 @@ function getStatus(submission_id) {
         let progress = completed / total;
         l.setProgress(progress);
 
+        if (completed === total) {
+            window.location.assign(`/download/${submission_id}`);
+            l.stop();
+            return false;
+        }
+
         setTimeout(function () {
             getStatus(res.data.submission_id);
         }, 1000);

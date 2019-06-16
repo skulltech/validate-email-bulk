@@ -111,8 +111,12 @@ def __process(emails, deep=False):
 def process():
     f = request.files['file']
     if not f:
-        return 'No file'
-    deep = request.args.get('deep')
+        response = {
+            'status': 'error',
+            'message': 'No file supplied'
+        }
+        return jsonify(response)
+    deep = request.form.get('deep')
 
     stream = StringIO(f.stream.read().decode('UTF8'), newline=None)
     emails = [line[0] for line in csv.reader(stream) if line[0]]
