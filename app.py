@@ -94,7 +94,7 @@ def index():
 def __process(emails, deep=False):
     submission = uuid.uuid4().hex
     print(f'[*] New submission: {submission}. Registering...', flush=True)
-    tasks = enqueue_emails(emails=emails, submission=submission)
+    tasks = enqueue_emails(emails=emails, submission=submission, deep=deep)
     print(len(emails), flush=True)
     l = wr.List(submission + '_tasks')
     try:
