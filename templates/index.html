@@ -1,76 +1,35 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Validate Emails · SkullTech</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='ladda-themeless.min.css') }}" rel="stylesheet">
 </head>
-<body>
-<h1>Transform a file demo</h1>
 
-<form action="{{ url_for('process') }}" method="POST" enctype="multipart/form-data">
-  <div class="form-group">
-    <label for="exampleFormControlFile1">Example file input</label>
-    <input type="file" name="file" class="form-control-file form-control-lg" id="exampleFormControlFile1">
-  </div>
-  <input type="submit"/>
+<body class="text-center">
+
+<form class="form-signin" action="{{ url_for('process') }}" method="POST" enctype="multipart/form-data">
+  <h1 class="h3 mb-3 font-weight-normal">Validate Emails</h1>
+  <label for="inputFile" class="sr-only">CSV file</label>
+  <input type="file" name="file" id="inputFile" class="form-control" placeholder="Email address" required autofocus>
+  <button class="btn btn-lg btn-primary btn-block ladda-button" data-style="expand-right" type="submit">
+    <span class="ladda-label">Upload and Process</span>
+  </button>
+  <p class="mt-5 mb-3 text-muted">&copy; 2017-2019</p>
 </form>
-
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
-<script>
-    // custom javascript
+<script src="{{ url_for('static', filename='spin.min.js') }}"></script>
+<script src="{{ url_for('static', filename='ladda.min.js') }}"></script>
+<script src="{{ url_for('static', filename='script.js') }}" type="module"></script>
 
-    $(document).ready(() => {
-        console.log('Sanity Check!');
-    });
 
-    $('form').submit(function (event) {
-        var formdata = $(this).serializeObject();
-        console.log(formdata);
-        event.preventDefault();
-
-        $("#loading").toggleClass("invisible");
-        $("#submitBtn").toggleClass("invisible");
-
-        $.ajax(
-            {
-                url: '/enqueue',
-                data: formdata,
-                type: 'POST',
-                dataType: 'JSON'
-            }
-        )
-            .done((res) => {
-                getStatus(res.data.task_id)
-            })
-            .fail((err) => {
-                console.log(err)
-            })
-    });
-
-    function getStatus(taskID) {
-        $.ajax({
-            url: `/tasks/${taskID}`,
-            method: 'GET'
-        })
-            .done((res) => {
-                const taskStatus = res.data.task_status;
-
-                if (taskStatus === 'finished' || taskStatus === 'failed') {
-                    window.location.assign(`/download/${taskID}`);
-                    $("#loading").toggleClass("invisible");
-                    $("#submitBtn").toggleClass("invisible");
-                    return false;
-                }
-                setTimeout(function () {
-                    getStatus(res.data.task_id);
-                }, 1000);
-            })
-            .fail((err) => {
-                console.log(err)
-            })
-    }
-</script>
 </body>
 </html>
+
