@@ -108,3 +108,6 @@ venv.bak/
 
 # CSV files used for testing
 *.csv
+
+#Sqlite database
+*.db

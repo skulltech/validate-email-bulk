@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from io import StringIO
 
 import redis
+from dateutil import parser
 from flask import Flask, render_template, request, jsonify, send_file
 from rq import Queue
 from rq_scheduler import Scheduler
@@ -32,11 +33,17 @@ def remove_submission(submission):
 
 
 def cron():
+    s = wr.Set('submission_ids')
+    print(f'[*] Total submissions: {len(s)}', flush=True)
     for submission in wr.Set('submission_ids'):
+        print(f'[*] Active submission: {submission}', flush=True)
         submission = submission.decode('UTF-8')
-        then = datetime.fromisoformat(wr[submission + '_polled'].decode('UTF-8'))
+        try:
+            then = parser.parse(wr[submission + '_polled'].decode('UTF-8'))
+        except KeyError:
+            then = datetime.utcnow() - timedelta(seconds=60)
         if datetime.utcnow() - then > timedelta(seconds=10):
-            print(f'[*] Removing submission: {submission}')
+            print(f'[*] Removing submission: {submission}', flush=True)
             remove_submission(submission)
 
 
@@ -86,23 +93,26 @@ def index():
 
 def __process(emails, deep=False):
     submission = uuid.uuid4().hex
-    print(f'[*] New submission: {submission}. Registering...')
-    wr.Set('submission_ids').add(submission)
-    tasks = enqueue_emails(emails=emails, submission=submission, deep=deep)
+    print(f'[*] New submission: {submission}. Registering...', flush=True)
+    tasks = enqueue_emails(emails=emails, submission=submission)
+    print(len(emails), flush=True)
     l = wr.List(submission + '_tasks')
     try:
         l.extend(tasks)
     except redis.exceptions.ConnectionError:
         for i in tasks:
             l.append(i)
+    print(len(l), flush=True)
     l = wr.List(submission + '_emails')
     try:
         l.extend(emails)
     except redis.exceptions.ConnectionError:
         for i in emails:
             l.append(i)
+    print(len(l), flush=True)
     wr.counter(submission + '_completed')
-    print(f'[*] Registered submission: {submission}')
+    print(f'[*] Registered submission: {submission}', flush=True)
+    wr.Set('submission_ids').add(submission)
     wr[submission + '_polled'] = datetime.utcnow().isoformat()
     return submission
 
