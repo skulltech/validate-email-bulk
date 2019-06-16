@@ -59,14 +59,41 @@ function getStatus(submission_id) {
         let progress = completed / total;
         l.setProgress(progress);
 
-        if (completed === total) {
+        if (progress > 0.9) {
+            console.log('Going deep...')
+            return getDeepStatus(submission_id);
+        }
+
+        setTimeout(function () {
+            getStatus(res.data.submission_id);
+        }, 1000);
+    }).fail((err) => {
+        console.log(err)
+    })
+}
+
+function getDeepStatus(submission_id) {
+    $.ajax({
+        url: `/status/${submission_id}?deep=True`,
+        method: 'GET'
+    }).done((res) => {
+        let completed = res.data.completed;
+        let total = res.data.total_tasks;
+        let failed = res.data.failed;
+        console.log(total, completed, failed);
+
+        var l = Ladda.create(document.querySelector('.ladda-button'));
+        let progress = (completed + failed) / total;
+        l.setProgress(progress);
+
+        if ((completed + failed) === total) {
             window.location.assign(`/download/${submission_id}`);
             l.stop();
             return false;
         }
 
         setTimeout(function () {
-            getStatus(res.data.submission_id);
+            getDeepStatus(res.data.submission_id);
         }, 1000);
     }).fail((err) => {
         console.log(err)

@@ -57,7 +57,7 @@ def schedule_cleaner():
 def task(email, submission=None, deep=False):
     record = pull(email)
     if record:
-        if record['color'] in ['green', 'red']:
+        if not deep or record['color'] in ['green', 'red']:
             if submission:
                 c = wr.counter(submission + '_completed')
                 c.incr()
@@ -70,11 +70,11 @@ def task(email, submission=None, deep=False):
     return response
 
 
-def enqueue_emails(emails, submission=None):
+def enqueue_emails(emails, submission=None, deep=False):
     tasks = []
     for email in emails:
         if email:
-            t = q.enqueue_call(func='app.task', args=(email, submission), result_ttl=7200, timeout=30)
+            t = q.enqueue_call(func='app.task', args=(email, submission, deep), result_ttl=7200, timeout=60)
             tasks.append(t.id)
     return tasks
 
@@ -88,7 +88,7 @@ def __process(emails, deep=False):
     submission = uuid.uuid4().hex
     print(f'[*] New submission: {submission}. Registering...')
     wr.Set('submission_ids').add(submission)
-    tasks = enqueue_emails(emails=emails, submission=submission)
+    tasks = enqueue_emails(emails=emails, submission=submission, deep=deep)
     l = wr.List(submission + '_tasks')
     try:
         l.extend(tasks)
