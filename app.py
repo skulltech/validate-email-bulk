@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from io import StringIO
 
 import redis
+from dateutil import parser
 from flask import Flask, render_template, request, jsonify, send_file
 from rq import Queue
 from rq_scheduler import Scheduler
@@ -34,7 +35,7 @@ def remove_submission(submission):
 def cron():
     for submission in wr.Set('submission_ids'):
         submission = submission.decode('UTF-8')
-        then = datetime.fromisoformat(wr[submission + '_polled'].decode('UTF-8'))
+        then = parser.parse(wr[submission + '_polled'].decode('UTF-8'))
         if datetime.utcnow() - then > timedelta(seconds=10):
             print(f'[*] Removing submission: {submission}')
             remove_submission(submission)

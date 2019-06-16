@@ -1,3 +1,4 @@
+peewee
 email_validator
 validate_email
 py3dns
