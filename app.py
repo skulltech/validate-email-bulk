@@ -118,7 +118,7 @@ def process():
         return jsonify(response)
     deep = request.form.get('deep')
 
-    stream = StringIO(f.stream.read().decode('UTF8'), newline=None)
+    stream = StringIO(f.stream.read().decode('UTF8', errors='replace'), newline=None)
     emails = [line[0] for line in csv.reader(stream) if line[0]]
     submission = __process(emails, deep)
 
@@ -139,7 +139,7 @@ def get_status(submission):
         'data': {
             'submission_id': submission,
             'total_tasks': len(l),
-            'completed': wr.counter(submission + '_completed').value(),
+            'completed': wr.counter(submission + '_completed').value()
         }
     }
 
